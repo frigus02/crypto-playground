@@ -1,6 +1,7 @@
 [package]
-name = "cryptopals-crypto-challenges"
+name = "crypto-playground"
 version = "0.1.0"
 authors = ["Jan Kuehle <jkuehle90@gmail.com>"]
 
 [dependencies]
+clap = "~2.32"
