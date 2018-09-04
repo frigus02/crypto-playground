@@ -1,0 +1,6 @@
+[package]
+name = "cryptopals-crypto-challenges"
+version = "0.1.0"
+authors = ["Jan Kuehle <jkuehle90@gmail.com>"]
+
+[dependencies]
