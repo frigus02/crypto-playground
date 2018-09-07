@@ -1,7 +1,8 @@
 extern crate clap;
 use clap::{App, AppSettings, Arg, SubCommand};
 
-mod hex_to_base64;
+mod challenges;
+mod encoding;
 
 fn main() {
     let matches = App::new("Crypto Playground")
@@ -17,6 +18,9 @@ fn main() {
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("hex-to-base64") {
-        println!("{}", hex_to_base64::run(matches.value_of("INPUT").unwrap()));
+        println!(
+            "{}",
+            challenges::hex_to_base64::run(matches.value_of("INPUT").unwrap())
+        );
     }
 }
