@@ -1,4 +1,5 @@
 use super::super::encoding::hex;
+use super::super::encoding::xor;
 
 pub fn run(hex1: &str, hex2: &str) -> String {
     if hex1.len() != hex2.len() {
@@ -7,14 +8,9 @@ pub fn run(hex1: &str, hex2: &str) -> String {
 
     let bytes1 = hex::decode(hex1);
     let bytes2 = hex::decode(hex2);
-    let bytes_len = bytes1.len();
+    let result = xor::encode(&bytes1, &bytes2);
 
-    let mut bytes3 = Vec::with_capacity(bytes_len);
-    for i in 0..bytes_len {
-        bytes3.push(bytes1[i] ^ bytes2[i]);
-    }
-
-    return hex::encode(bytes3.as_slice());
+    return hex::encode(&result);
 }
 
 #[cfg(test)]

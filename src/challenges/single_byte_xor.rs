@@ -1,15 +1,11 @@
 use super::super::encoding::hex;
+use super::super::encoding::xor;
 
 pub fn run(hex: &str, encoding_byte: u8) -> String {
     let bytes = hex::decode(hex);
-    let bytes_len = bytes.len();
+    let result = xor::encode(&bytes, &vec![encoding_byte]);
 
-    let mut encoded_bytes = Vec::with_capacity(bytes_len);
-    for i in 0..bytes_len {
-        encoded_bytes.push(bytes[i] ^ encoding_byte);
-    }
-
-    return hex::encode(encoded_bytes.as_slice());
+    return hex::encode(&result);
 }
 
 #[cfg(test)]

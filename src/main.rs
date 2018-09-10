@@ -1,5 +1,6 @@
 extern crate clap;
 use clap::{App, AppSettings, Arg, SubCommand};
+use std::process;
 
 mod challenges;
 mod encoding;
@@ -45,6 +46,14 @@ fn main() {
                         .index(2),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("detect-single-char-xor").arg(
+                Arg::with_name("INPUT")
+                    .help("input hex string")
+                    .required(true)
+                    .index(1),
+            ),
+        )
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("hex-to-base64") {
@@ -68,5 +77,14 @@ fn main() {
                 matches.value_of("BYTE").unwrap().parse::<u8>().unwrap()
             )
         );
+    } else if let Some(matches) = matches.subcommand_matches("detect-single-char-xor") {
+        let result = challenges::detect_single_char_xor::run(matches.value_of("INPUT").unwrap());
+        match result {
+            Ok(info) => println!(
+                "Key: \"{}\"\nDecoded: \"{}\"",
+                info.key as char, info.plain_text
+            ),
+            Err(_) => process::exit(1),
+        };
     }
 }
