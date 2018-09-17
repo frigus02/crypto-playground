@@ -54,6 +54,21 @@ fn main() {
                     .index(1),
             ),
         )
+        .subcommand(
+            SubCommand::with_name("repeating-key-xor")
+                .arg(
+                    Arg::with_name("INPUT")
+                        .help("input hex string")
+                        .required(true)
+                        .index(1),
+                )
+                .arg(
+                    Arg::with_name("KEY")
+                        .help("encoding key")
+                        .required(true)
+                        .index(2),
+                ),
+        )
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("hex-to-base64") {
@@ -86,5 +101,13 @@ fn main() {
             ),
             Err(_) => process::exit(1),
         };
+    } else if let Some(matches) = matches.subcommand_matches("repeating-key-xor") {
+        println!(
+            "{}",
+            challenges::repeating_key_xor::run(
+                matches.value_of("INPUT").unwrap(),
+                matches.value_of("KEY").unwrap().as_bytes()
+            )
+        );
     }
 }
