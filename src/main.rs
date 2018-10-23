@@ -15,61 +15,53 @@ fn main() {
                     .required(true)
                     .index(1),
             ),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("fixed-xor")
                 .arg(
                     Arg::with_name("INPUT1")
                         .help("input first hex string")
                         .required(true)
                         .index(1),
-                )
-                .arg(
+                ).arg(
                     Arg::with_name("INPUT2")
                         .help("input second hex string")
                         .required(true)
                         .index(2),
                 ),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("single-byte-xor")
                 .arg(
                     Arg::with_name("INPUT")
                         .help("input hex string")
                         .required(true)
                         .index(1),
-                )
-                .arg(
+                ).arg(
                     Arg::with_name("BYTE")
                         .help("encoding byte (number between 0 and 255)")
                         .required(true)
                         .index(2),
                 ),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("detect-single-char-xor").arg(
                 Arg::with_name("INPUT")
                     .help("input hex string")
                     .required(true)
                     .index(1),
             ),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("repeating-key-xor")
                 .arg(
                     Arg::with_name("INPUT")
                         .help("input hex string")
                         .required(true)
                         .index(1),
-                )
-                .arg(
+                ).arg(
                     Arg::with_name("KEY")
                         .help("encoding key")
                         .required(true)
                         .index(2),
                 ),
-        )
-        .get_matches();
+        ).get_matches();
 
     if let Some(matches) = matches.subcommand_matches("hex-to-base64") {
         println!(
@@ -96,10 +88,13 @@ fn main() {
         let result = challenges::detect_single_char_xor::run(matches.value_of("INPUT").unwrap());
         match result {
             Ok(info) => println!(
-                "Key: \"{}\"\nDecoded: \"{}\"",
-                info.key as char, info.plain_text
+                "Key: \"{}\"\nDecoded: \"{}\"\nScore: {}",
+                info.key as char, info.plain_text, info.score
             ),
-            Err(_) => process::exit(1),
+            Err(err) => {
+                eprintln!("Error: {}", err);
+                process::exit(1)
+            }
         };
     } else if let Some(matches) = matches.subcommand_matches("repeating-key-xor") {
         println!(

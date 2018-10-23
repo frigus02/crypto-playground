@@ -8,10 +8,12 @@ use std::io::prelude::BufRead;
 
 const ASCII_SPACE: u8 = 32;
 const ASCII_DEL: u8 = 127;
+const NOT_A_LETTER_PENALTY: f64 = 5.0;
 
 pub struct Info {
     pub key: u8,
     pub plain_text: String,
+    pub score: f64,
 }
 
 pub fn run(hex: &str) -> Result<Info, String> {
@@ -20,7 +22,7 @@ pub fn run(hex: &str) -> Result<Info, String> {
     let bytes = hex::decode(hex);
     let key_range = ASCII_SPACE..ASCII_DEL;
 
-    let key = key_range
+    let (score, key) = key_range
         .into_iter()
         .map(|key| {
             let encoded_bytes = xor::encode(&bytes, &vec![key]);
@@ -31,7 +33,7 @@ pub fn run(hex: &str) -> Result<Info, String> {
                 .map(|(letter, frequency)| {
                     en_letter_frequency
                         .get(letter)
-                        .map_or(frequency.clone(), |en_frequency| {
+                        .map_or(frequency * NOT_A_LETTER_PENALTY, |en_frequency| {
                             (frequency - en_frequency).abs()
                         })
                 }).collect();
@@ -41,12 +43,15 @@ pub fn run(hex: &str) -> Result<Info, String> {
             (score, key)
         }).min_by(|(score_x, _), (score_y, _)| {
             score_x.partial_cmp(score_y).unwrap_or(Ordering::Greater)
-        }).ok_or(String::from("score collection empty"))?
-        .1;
+        }).ok_or(String::from("score collection empty"))?;
 
     let decoded_bytes = xor::encode(&bytes, &vec![key]);
     return match String::from_utf8(decoded_bytes) {
-        Ok(plain_text) => Ok(Info { key, plain_text }),
+        Ok(plain_text) => Ok(Info {
+            key,
+            plain_text,
+            score,
+        }),
         Err(err) => Err(format!("decoding failed: {}", err)),
     };
 }
@@ -76,7 +81,7 @@ fn get_en_letter_frequency() -> Result<HashMap<u8, f64>, io::Error> {
             .parse::<f64>()
             .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "cannot parse frequency"))?;
 
-        scores.insert(letter, frequency);
+        scores.insert(letter, frequency / 100.0);
     }
 
     return Ok(scores);
@@ -92,7 +97,7 @@ fn get_byte_frequency(bytes: &[u8]) -> HashMap<u8, f64> {
 
     let len = bytes.len() as f64;
     for frequency in scores.values_mut() {
-        *frequency = *frequency * 100.0 / len;
+        *frequency = *frequency / len;
     }
 
     return scores;
