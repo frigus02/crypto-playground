@@ -45,6 +45,10 @@ fn encode_value(value: u8) -> u8 {
     };
 }
 
+pub fn decode(base64: &str) -> Vec<u8> {
+    return vec![];
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -54,5 +58,12 @@ mod tests {
         let bytes = vec![73, 39, 109];
         let base64 = encode(bytes.as_slice());
         assert_eq!("SSdt", base64);
+    }
+
+    #[test]
+    fn decode_test() {
+        let base64 = "SSdt";
+        let bytes = decode(base64);
+        assert_eq!(vec![73, 39, 109], bytes);
     }
 }

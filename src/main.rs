@@ -62,6 +62,13 @@ fn main() {
                         .required(true)
                         .index(2),
                 ),
+        ).subcommand(
+            SubCommand::with_name("break-repeating-key-xor").arg(
+                Arg::with_name("INPUT")
+                    .help("input base64 string")
+                    .required(true)
+                    .index(1),
+            ),
         ).get_matches();
 
     if let Some(matches) = matches.subcommand_matches("hex-to-base64") {
@@ -105,5 +112,14 @@ fn main() {
                 matches.value_of("KEY").unwrap().as_bytes()
             )
         );
+    } else if let Some(matches) = matches.subcommand_matches("break-repeating-key-xor") {
+        let result = challenges::break_repeating_key_xor::run(matches.value_of("INPUT").unwrap());
+        match result {
+            Ok(info) => println!("Key: \"{:?}\"\nDecoded: \"{}\"", info.key, info.plain_text),
+            Err(err) => {
+                eprintln!("Error: {}", err);
+                process::exit(1)
+            }
+        };
     }
 }
