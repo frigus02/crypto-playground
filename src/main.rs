@@ -2,6 +2,7 @@ extern crate clap;
 use clap::{App, AppSettings, Arg, SubCommand};
 use std::process;
 
+mod analysis;
 mod challenges;
 mod encoding;
 
