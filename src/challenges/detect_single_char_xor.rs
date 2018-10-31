@@ -1,10 +1,5 @@
-use super::super::analysis::letter_frequency::{get_en_letter_frequency_map, score};
+use super::super::analysis::letter_frequency::{get_best_xor_score, get_en_letter_frequency_map};
 use super::super::encoding::hex;
-use super::super::encoding::xor;
-use std::cmp::Ordering;
-
-const ASCII_SPACE: u8 = 32;
-const ASCII_DEL: u8 = 127;
 
 pub struct Info {
     pub key: u8,
@@ -16,24 +11,13 @@ pub fn run(hex: &str) -> Result<Info, String> {
     let en_letter_frequency_map = get_en_letter_frequency_map()
         .map_err(|err| format!("reading letter_frequency_en failed: {}", err))?;
     let bytes = hex::decode(hex);
-    let key_range = ASCII_SPACE..ASCII_DEL;
+    let score = get_best_xor_score(&en_letter_frequency_map, &bytes)?;
 
-    let (key, decoded_bytes, score) = key_range
-        .into_iter()
-        .map(|key| {
-            let decoded_bytes = xor::encode(&bytes, &vec![key]);
-            let score = score(&en_letter_frequency_map, &decoded_bytes);
-
-            (key, decoded_bytes, score)
-        }).min_by(|(_, _, score_x), (_, _, score_y)| {
-            score_x.partial_cmp(score_y).unwrap_or(Ordering::Greater)
-        }).ok_or(String::from("score collection empty"))?;
-
-    return match String::from_utf8(decoded_bytes) {
+    return match String::from_utf8(score.decoded_bytes) {
         Ok(plain_text) => Ok(Info {
-            key,
+            key: score.key,
             plain_text,
-            score,
+            score: score.score,
         }),
         Err(err) => Err(format!("decoding failed: {}", err)),
     };

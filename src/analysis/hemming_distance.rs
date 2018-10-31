@@ -1,10 +1,10 @@
-pub fn get(bytes_a: &[u8], bytes_b: &[u8]) -> Result<u8, String> {
+pub fn get(bytes_a: &[u8], bytes_b: &[u8]) -> Result<usize, String> {
     if bytes_a.len() != bytes_b.len() {
         return Err(String::from("byte slices don't have the same length"));
     }
 
     let bytes = bytes_a.iter().zip(bytes_b);
-    let mut distance: u8 = 0;
+    let mut distance: usize = 0;
     for (byte_a, byte_b) in bytes {
         for shift in 0..8 {
             let mask = 1 << shift;

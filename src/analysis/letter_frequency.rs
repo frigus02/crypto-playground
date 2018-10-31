@@ -1,9 +1,38 @@
+use super::super::encoding::xor;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io;
 use std::io::prelude::BufRead;
 
-const NOT_A_LETTER_PENALTY: f64 = 5.0;
+const ASCII_SPACE: u8 = 32;
+const ASCII_DEL: u8 = 127;
+const NOT_A_LETTER_PENALTY: f64 = 10.0;
+
+pub struct Score {
+    pub key: u8,
+    pub decoded_bytes: Vec<u8>,
+    pub score: f64,
+}
+
+pub fn get_best_xor_score(
+    base_frequency_map: &HashMap<u8, f64>,
+    bytes: &[u8],
+) -> Result<Score, String> {
+    return (ASCII_SPACE..ASCII_DEL)
+        .into_iter()
+        .map(|key| {
+            let decoded_bytes = xor::encode(&bytes, &vec![key]);
+            let score = score(base_frequency_map, &decoded_bytes);
+
+            Score {
+                key,
+                decoded_bytes,
+                score,
+            }
+        }).min_by(|x, y| x.score.partial_cmp(&y.score).unwrap_or(Ordering::Greater))
+        .ok_or(String::from("score collection empty"));
+}
 
 pub fn score(base_frequency_map: &HashMap<u8, f64>, bytes: &[u8]) -> f64 {
     let byte_frequency = get_byte_frequency_map(bytes);
