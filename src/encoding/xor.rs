@@ -7,7 +7,7 @@ pub fn encode(bytes: &[u8], encoding: &[u8]) -> Vec<u8> {
         encoded_bytes.push(bytes[i] ^ encoding[i % encoding_len]);
     }
 
-    return encoded_bytes;
+    encoded_bytes
 }
 
 #[cfg(test)]

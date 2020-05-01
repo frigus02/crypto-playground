@@ -10,7 +10,7 @@ pub fn run(hex1: &str, hex2: &str) -> String {
     let bytes2 = hex::decode(hex2);
     let result = xor::encode(&bytes1, &bytes2);
 
-    return hex::encode(&result);
+    hex::encode(&result)
 }
 
 #[cfg(test)]

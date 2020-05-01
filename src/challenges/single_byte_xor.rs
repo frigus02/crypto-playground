@@ -3,9 +3,9 @@ use super::super::encoding::xor;
 
 pub fn run(hex: &str, encoding_byte: u8) -> String {
     let bytes = hex::decode(hex);
-    let result = xor::encode(&bytes, &vec![encoding_byte]);
+    let result = xor::encode(&bytes, &[encoding_byte]);
 
-    return hex::encode(&result);
+    hex::encode(&result)
 }
 
 #[cfg(test)]

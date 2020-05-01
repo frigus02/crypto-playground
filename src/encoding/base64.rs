@@ -26,11 +26,11 @@ pub fn encode(bytes: &[u8]) -> String {
         base64_bytes.push(encode_value(value));
     }
 
-    return String::from_utf8(base64_bytes).unwrap();
+    String::from_utf8(base64_bytes).unwrap()
 }
 
 fn encode_value(value: u8) -> u8 {
-    return if value <= 25 {
+    if value <= 25 {
         value + 65 // "A" - "Z"
     } else if value >= 26 && value <= 51 {
         value + 71 // "a" - "z"
@@ -42,7 +42,7 @@ fn encode_value(value: u8) -> u8 {
         47 // "/"
     } else {
         panic!("Invalid base64 value: {}", value);
-    };
+    }
 }
 
 pub fn decode(base64: &str) -> Vec<u8> {
@@ -62,23 +62,23 @@ pub fn decode(base64: &str) -> Vec<u8> {
         };
 
         if i % 3 == 0 {
-            part1 = part1 << 2;
-            part2 = part2 >> 4;
+            part1 <<= 2;
+            part2 >>= 4;
         } else if i % 3 == 1 {
-            part1 = part1 << 4;
-            part2 = part2 >> 2;
+            part1 <<= 4;
+            part2 >>= 2;
         } else {
-            part1 = part1 << 6;
+            part1 <<= 6;
         }
 
         bytes.push(part1 + part2);
     }
 
-    return bytes;
+    bytes
 }
 
 fn decode_value(value: u8) -> u8 {
-    return if value >= 65 && value <= 90 {
+    if value >= 65 && value <= 90 {
         value - 65 // "A" - "Z"
     } else if value >= 97 && value <= 122 {
         value - 71 // "a" - "z"
@@ -90,7 +90,7 @@ fn decode_value(value: u8) -> u8 {
         63 // "/"
     } else {
         panic!("Invalid base64 value: {}", value);
-    };
+    }
 }
 
 #[cfg(test)]

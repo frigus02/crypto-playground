@@ -19,10 +19,9 @@ pub fn get_best_xor_score(
     base_frequency_map: &HashMap<u8, f64>,
     bytes: &[u8],
 ) -> Result<Score, String> {
-    return (ASCII_SPACE..ASCII_DEL)
-        .into_iter()
+    (ASCII_SPACE..ASCII_DEL)
         .map(|key| {
-            let decoded_bytes = xor::encode(&bytes, &vec![key]);
+            let decoded_bytes = xor::encode(&bytes, &[key]);
             let score = score(base_frequency_map, &decoded_bytes);
 
             Score {
@@ -30,8 +29,9 @@ pub fn get_best_xor_score(
                 decoded_bytes,
                 score,
             }
-        }).min_by(|x, y| x.score.partial_cmp(&y.score).unwrap_or(Ordering::Greater))
-        .ok_or(String::from("score collection empty"));
+        })
+        .min_by(|x, y| x.score.partial_cmp(&y.score).unwrap_or(Ordering::Greater))
+        .ok_or_else(|| String::from("score collection empty"))
 }
 
 pub fn score(base_frequency_map: &HashMap<u8, f64>, bytes: &[u8]) -> f64 {
@@ -44,9 +44,10 @@ pub fn score(base_frequency_map: &HashMap<u8, f64>, bytes: &[u8]) -> f64 {
                 .map_or(frequency * NOT_A_LETTER_PENALTY, |base_frequency| {
                     (frequency - base_frequency).abs()
                 })
-        }).collect();
+        })
+        .collect();
 
-    return differences.iter().sum::<f64>() / differences.len() as f64;
+    differences.iter().sum::<f64>() / differences.len() as f64
 }
 
 pub fn get_en_letter_frequency_map() -> Result<HashMap<u8, f64>, io::Error> {
@@ -57,7 +58,7 @@ pub fn get_en_letter_frequency_map() -> Result<HashMap<u8, f64>, io::Error> {
     for line in reader.lines() {
         let line = line?;
         let line = line.trim();
-        if line.len() == 0 {
+        if line.is_empty() {
             continue;
         }
 
@@ -77,7 +78,7 @@ pub fn get_en_letter_frequency_map() -> Result<HashMap<u8, f64>, io::Error> {
         scores.insert(letter, frequency / 100.0);
     }
 
-    return Ok(scores);
+    Ok(scores)
 }
 
 fn get_byte_frequency_map(bytes: &[u8]) -> HashMap<u8, f64> {
@@ -90,8 +91,8 @@ fn get_byte_frequency_map(bytes: &[u8]) -> HashMap<u8, f64> {
 
     let len = bytes.len() as f64;
     for frequency in scores.values_mut() {
-        *frequency = *frequency / len;
+        *frequency /= len;
     }
 
-    return scores;
+    scores
 }

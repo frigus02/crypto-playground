@@ -13,14 +13,14 @@ pub fn run(hex: &str) -> Result<Info, String> {
     let bytes = hex::decode(hex);
     let score = get_best_xor_score(&en_letter_frequency_map, &bytes)?;
 
-    return match String::from_utf8(score.decoded_bytes) {
+    match String::from_utf8(score.decoded_bytes) {
         Ok(plain_text) => Ok(Info {
             key: score.key,
             plain_text,
             score: score.score,
         }),
         Err(err) => Err(format!("decoding failed: {}", err)),
-    };
+    }
 }
 
 #[cfg(test)]
@@ -34,7 +34,7 @@ mod tests {
         assert!(result.is_ok());
 
         let info = result.unwrap();
-        assert_eq!('X' as u8, info.key);
+        assert_eq!(b'X', info.key);
         assert_eq!("Cooking MC's like a pound of bacon", info.plain_text);
     }
 }

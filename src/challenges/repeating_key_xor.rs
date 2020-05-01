@@ -5,7 +5,7 @@ pub fn run(plain_text: &str, encoding_bytes: &[u8]) -> String {
     let bytes = plain_text.as_bytes();
     let result = xor::encode(&bytes, encoding_bytes);
 
-    return hex::encode(&result);
+    hex::encode(&result)
 }
 
 #[cfg(test)]

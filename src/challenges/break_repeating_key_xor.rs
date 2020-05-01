@@ -18,18 +18,18 @@ pub fn run(base64: &str) -> Result<Info, String> {
     let bytes_len = bytes.len();
 
     let mut possible_key_sizes = (2..41)
-        .into_iter()
         .map(|key_size| {
             get_average_normalized_hemming_distance(&bytes, key_size, 10)
                 .map(|edit_distance| (key_size, edit_distance))
-        }).collect::<Result<Vec<_>, _>>()?;
+        })
+        .collect::<Result<Vec<_>, _>>()?;
     possible_key_sizes.sort_by(|(_, edit_distance_a), (_, edit_distance_b)| {
         edit_distance_a
             .partial_cmp(edit_distance_b)
             .unwrap_or(Ordering::Greater)
     });
 
-    let possible_keys: Vec<_> = possible_key_sizes
+    let best_key = possible_key_sizes
         .into_iter()
         .take(3)
         .filter_map(|(key_size, _)| {
@@ -43,9 +43,9 @@ pub fn run(base64: &str) -> Result<Info, String> {
             let mut transposed_blocks = Vec::with_capacity(key_size);
             for i in 0..key_size {
                 let mut transposed_block = Vec::with_capacity(blocks_len);
-                for j in 0..blocks_len {
-                    if i < blocks[j].len() {
-                        transposed_block.push(blocks[j][i]);
+                for block in &blocks {
+                    if i < block.len() {
+                        transposed_block.push(block[i]);
                     }
                 }
 
@@ -54,9 +54,8 @@ pub fn run(base64: &str) -> Result<Info, String> {
 
             let scores: Result<Vec<_>, _> = transposed_blocks
                 .iter()
-                .map(|block| {
-                    get_best_xor_score(&en_letter_frequency_map, block) //.map(|score| score.key)
-                }).collect();
+                .map(|block| get_best_xor_score(&en_letter_frequency_map, block))
+                .collect();
 
             scores
                 .map(|scores| {
@@ -64,24 +63,18 @@ pub fn run(base64: &str) -> Result<Info, String> {
                     let score_sum: f64 = scores.iter().map(|score| score.score).sum();
 
                     (key, score_sum / scores.len() as f64)
-                }).ok()
-        }).collect();
+                })
+                .ok()
+        })
+        .max_by(|(_, score_a), (_, score_b)| score_a.partial_cmp(score_b).unwrap_or(Ordering::Less))
+        .ok_or("List of possible_keys is empty")?;
 
-    for result in possible_keys {
-        let key = result.0;
-        let decoded_bytes = xor::encode(&bytes, &key);
-        let decoded_key = String::from_utf8(key).unwrap();
-        match String::from_utf8(decoded_bytes) {
-            Ok(plain_text) => {
-                println!("\n****\nKey: {} {}\n****\nText: {}\n", decoded_key, result.1, plain_text)
-            }
-            Err(err) => println!("\ndecoding failed: {}\n", err),
-        };
+    let key = best_key.0;
+    let decoded_bytes = xor::encode(&bytes, &key);
+    match String::from_utf8(decoded_bytes) {
+        Ok(plain_text) => Ok(Info { key, plain_text }),
+        Err(err) => Err(format!("decoding failed: {}", err)),
     }
-
-    let key = vec![1, 2, 3];
-    let plain_text = String::from("hello");
-    return Ok(Info { key, plain_text });
 }
 
 fn get_average_normalized_hemming_distance(
@@ -91,7 +84,6 @@ fn get_average_normalized_hemming_distance(
 ) -> Result<f64, String> {
     let bytes_len = bytes.len();
     let normalized_edit_distances = (0..chunks)
-        .into_iter()
         .filter_map(|no| {
             let first_index = no * 2 * key_size;
             let second_index = (no * 2 + 1) * key_size;
@@ -107,12 +99,13 @@ fn get_average_normalized_hemming_distance(
             } else {
                 None
             }
-        }).collect::<Result<Vec<_>, _>>()?;
+        })
+        .collect::<Result<Vec<_>, _>>()?;
 
     let used_chunks = normalized_edit_distances.len();
     let sum = normalized_edit_distances.iter().sum::<f64>();
 
-    return Ok(sum / used_chunks as f64);
+    Ok(sum / used_chunks as f64)
 }
 
 #[cfg(test)]

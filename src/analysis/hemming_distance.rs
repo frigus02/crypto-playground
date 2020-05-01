@@ -14,7 +14,7 @@ pub fn get(bytes_a: &[u8], bytes_b: &[u8]) -> Result<usize, String> {
         }
     }
 
-    return Ok(distance);
+    Ok(distance)
 }
 
 #[cfg(test)]

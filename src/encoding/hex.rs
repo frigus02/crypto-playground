@@ -21,17 +21,17 @@ pub fn encode(bytes: &[u8]) -> String {
         hex_bytes.push(encode_value(value));
     }
 
-    return String::from_utf8(hex_bytes).unwrap();
+    String::from_utf8(hex_bytes).unwrap()
 }
 
 fn encode_value(value: u8) -> u8 {
-    return if value <= 9 {
+    if value <= 9 {
         value + 48 // "0" - "9"
     } else if value >= 10 && value <= 15 {
         value + 87 // "a" - "f"
     } else {
         panic!("Invalid hex value: {}", value);
-    };
+    }
 }
 
 pub fn decode(hex: &str) -> Vec<u8> {
@@ -52,11 +52,11 @@ pub fn decode(hex: &str) -> Vec<u8> {
         bytes.push(part1 + part2);
     }
 
-    return bytes;
+    bytes
 }
 
 fn decode_value(value: u8) -> u8 {
-    return if value >= 48 && value <= 57 {
+    if value >= 48 && value <= 57 {
         value - 48 // "0" - "9"
     } else if value >= 65 && value <= 70 {
         value - 55 // "A" - "F"
@@ -64,7 +64,7 @@ fn decode_value(value: u8) -> u8 {
         value - 87 // "a" - "f"
     } else {
         panic!("Invalid hex value: {}", value);
-    };
+    }
 }
 
 #[cfg(test)]

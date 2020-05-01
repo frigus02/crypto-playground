@@ -4,7 +4,7 @@ use super::super::encoding::hex;
 pub fn run(hex: &str) -> String {
     let bytes = hex::decode(hex);
 
-    return base64::encode(bytes.as_slice());
+    base64::encode(bytes.as_slice())
 }
 
 #[cfg(test)]
